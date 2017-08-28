@@ -1,5 +1,14 @@
 <link rel="import" href="../polymer/polymer.html">
-
+<link rel="import" href="../paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-ripple/paper-ripple.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-media-query/iron-media-query.html">
 <!--
 `paper-dropdown-resp`
 
@@ -13,8 +22,92 @@
       :host {
         display: block;
       }
+      paper-button{
+        text-transform: none !important;
+      }
+      paper-dialog{
+        position:fixed;
+        bottom:0px;
+        right:0px;
+        width:100%;
+        margin:0px;
+        max-width: inherit;
+        max-height: inherit;
+        background-color:white !important;
+
+      }
+      .animation{
+
+      	overflow-y: hidden;
+
+      	transition-property: all;
+      	transition-duration: .5s;
+      	transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+      }
+      .titleDialog{
+        padding:10px;
+        @apply(--papar-dropdown-resp-dialog-title);
+      }
+      .container {
+        @apply --layout-horizontal;
+        margin:0px;
+        padding:10px;
+      }
+      .flexchild {
+        @apply --layout-flex;
+      }
+      .dialogTextContent{
+        line-height: 42px;
+        @apply(--papar-dropdown-resp-dialog-text);
+      }
+      .dialogTextContainer{
+      }
+      .icon{
+        padding:10px;
+      }
+      .dialogOption{
+        position: relative;
+      }
     </style>
-    <h2>Hello [[prop1]]!</h2>
+    <style is="custom-style" include="iron-flex iron-flex-alignment"></style>
+
+    <iron-media-query query="(max-width: 768px) and (max-height:768px)" query-matches="{{_mobile}}"></iron-media-query>
+
+    <template is="dom-if" if="{{!_mobile}}">
+      <paper-menu-button no-animation horizontal-align="right" allow-outside-scroll=false>
+        <paper-button id="button" slot="dropdown-trigger"  >{{buttonText}}</paper-button>
+        <paper-listbox slot="dropdown-content">
+          <template id="repeater" is="dom-repeat" items="{{options}}">
+            <paper-item class="menu-option " on-click="selectOption" >
+              {{item.text}}
+            </paper-item>
+          </template>
+        </paper-listbox>
+      </paper-menu-button>
+    </template>
+
+    <template is="dom-if" if="{{_mobile}}">
+      <paper-button id="button" on-click="_press">{{buttonText}}</paper-button>
+      <paper-dialog class$="{{_animation}}"  opened="{{_dialog_open}}">
+        <template is="dom-if" if="{{withTitle}}">
+          <div class="titleDialog">
+            {{title}}
+          </div>
+          <template id="repeater" is="dom-repeat" items="{{options}}">
+            <div class="container dialogOption">
+                <template is="dom-if" if="{{_isDefined(item.icon)}}">
+                  <div><iron-icon class="icon" icon="{{item.icon}}" src="{{item.icon}}" ></iron-icon></div>
+                </template>
+                <div class="flexchild dialogTextContainer"><div class="dialogTextContent">{{item.text}}</div></div>
+                <paper-ripple></paper-ripple>
+            </div>
+          </template>
+
+        </template>
+      </paper-dialog>
+
+    </template>
+
   </template>
 
   <script>
@@ -23,12 +116,50 @@
       is: 'paper-dropdown-resp',
 
       properties: {
-        prop1: {
-          type: String,
-          value: 'paper-dropdown-resp',
+        withTitle:{
+          type: Boolean,
+          notify:true,
+          value:true
         },
+        withIcon:{
+          type: Boolean,
+          notify:true,
+          value:true
+        },
+        title:{
+          type: String,
+          value: 'Choose an option'
+        },
+        buttonText: {
+          type: String,
+          value: 'Altro',
+        },
+        _mobile:{
+          type: Boolean,
+          notify:true
+        },
+        _animation:{
+          type:String,
+          value: ''
+        },
+        options:{
+          type:Array,
+          notify:true,
+          value:function(){ return [{icon:"check",text:"test1"},{icon:"check",text:"test2"},{icon:"check",text:"test3"}]}
+        },
+        _dialog_open:{
+          type: Boolean,
+          value:false,
+          notify:true
+        }
       },
-
+      _isDefined:function(content){
+          return (content != undefined);
+      },
+      _press:function(){
+        this._dialog_open= !this._dialog_openz;
+        this._animation = "animation";
+      }
     });
   </script>
 </dom-module>
